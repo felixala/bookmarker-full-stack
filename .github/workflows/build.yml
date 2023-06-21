@@ -1,11 +1,9 @@
-name: Java CI with Maven
+name: Build
 
-# What branches and events to trigger in the pipeline
 on:
   push:
-    branches: [ "**" ]  #if we specify branches: [ "main" ], it is only main branch. If we use **, means any branch
+    branches: [ "**" ]
 
-# In the pipeline we can run multiple jobs paralelly
 jobs:
   build-bookmarker-api:
     name: Build bookmarker-api
@@ -15,19 +13,20 @@ jobs:
         working-directory: ./bookmarker-api
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: 17
           distribution: 'temurin'
-          cache: maven #maven will download all depedencies anytime is needed
-      - name: Build with Maven
-        run: ./mvnw verify #compile and create jar file
+          cache: 'maven'
 
-      #If github.ref (reference to branch) is refs or head or main, so run the next steps
-      - if: ${{ github.ref == 'refs/head/main' }}
+      - name: Build with Maven
+        run: ./mvnw verify
+
+      - if: ${{ github.ref == 'refs/heads/main' }}
         name: Build and Publish Docker Image
-        run:
+        run: |
           ./mvnw clean package jib:dockerBuild -DskipTests
-          docker login -u {{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push ${{ secrets.DOCKER_USERNAME }}/bookmarker-api
