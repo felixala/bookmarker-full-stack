@@ -121,6 +121,7 @@
 						</tags>
 					</to>
 					<container>
+						<mainClass>com.test.ServerApplication</mainClass>
 						<ports>
 							<port>8080</port>
 						</ports>
