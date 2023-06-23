@@ -43,7 +43,7 @@ public class BookmarkControllerTest {
     private List<Bookmark> bookmarks;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         repository.deleteAllInBatch();
         bookmarks = new ArrayList<>();
 
@@ -75,7 +75,7 @@ public class BookmarkControllerTest {
     void shouldGetBookmarks(int pageNo, int totalElements, int totalPages, int currentPage,
                             boolean isFirst, boolean isLast,
                             boolean hasNext, boolean hasPrevious) throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/bookmarks?page="+pageNo))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/bookmarks?page=" + pageNo))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", CoreMatchers.equalTo(totalElements)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages", CoreMatchers.equalTo(totalPages)))
@@ -88,11 +88,11 @@ public class BookmarkControllerTest {
     }
 
     @Test
-    void shouldCreateBookmarkSuccessfully() throws Exception{
+    void shouldCreateBookmarkSuccessfully() throws Exception {
         this.mockMvc.perform(
-                post("/api/bookmarks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+                        post("/api/bookmarks")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
                                 {
                                 "title": "Felix Laura",
                                 "url": "https://github.com/felixala/"
@@ -108,7 +108,8 @@ public class BookmarkControllerTest {
 
     @Test
     void shouldFailToCreateBookmarkWhenUrlIsNotPresent() throws Exception {
-        this.mockMvc.perform(post("/api/bookmarks")
+        this.mockMvc.perform(
+                        post("/api/bookmarks")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                 {
