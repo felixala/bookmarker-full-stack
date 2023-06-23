@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -19,6 +20,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
@@ -27,7 +35,7 @@ import java.util.List;
 public class BookmarkControllerTest {
 
     @Autowired
-    BookmarkRepository repository;
+    private BookmarkRepository repository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,7 +76,7 @@ public class BookmarkControllerTest {
                             boolean isFirst, boolean isLast,
                             boolean hasNext, boolean hasPrevious) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/bookmarks?page="+pageNo))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", CoreMatchers.equalTo(totalElements)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages", CoreMatchers.equalTo(totalPages)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.currentPage", CoreMatchers.equalTo(currentPage)))
@@ -77,5 +85,45 @@ public class BookmarkControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.hasNext", CoreMatchers.equalTo(hasNext)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.hasPrevious", CoreMatchers.equalTo(hasPrevious)))
         ;
+    }
+
+    @Test
+    void shouldCreateBookmarkSuccessfully() throws Exception{
+        this.mockMvc.perform(
+                post("/api/bookmarks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                "title": "Felix Laura",
+                                "url": "https://github.com/felixala/"
+                                }
+                                """)
+
+        )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.title", is("Felix Laura")))
+                .andExpect(jsonPath("$.url", is("https://github.com/felixala/")));
+    }
+
+    @Test
+    void shouldFailToCreateBookmarkWhenUrlIsNotPresent() throws Exception {
+        this.mockMvc.perform(post("/api/bookmarks")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                {
+                    "title": "Felix Laura"
+                }
+                """)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", is("application/problem+json")))
+                .andExpect(jsonPath("$.type", is("https://zalando.github.io/problem/constraint-violation")))
+                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+                .andExpect(jsonPath("$.status", is(400)))
+                .andExpect(jsonPath("$.violations", hasSize(1)))
+                .andExpect(jsonPath("$.violations[0].field", is("url")))
+                .andExpect(jsonPath("$.violations[0].message", is("Url should not be empty")))
+                .andReturn();
     }
 }

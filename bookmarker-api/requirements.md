@@ -96,3 +96,16 @@ And we can run the application using the image.
 
 ### Continuos Integration using Github Actions
 See file .github/workflows/build.yml
+
+### Handling Exceptions
+Use Problem: Spring Web MVC
+https://github.com/zalando/problem-spring-web
+
+Add dependency
+```
+<dependency>
+    <groupId>org.zalando</groupId>
+    <artifactId>problem-spring-web-starter</artifactId>
+    <version>${problem-spring-web.version}</version>
+</dependency>
+```
