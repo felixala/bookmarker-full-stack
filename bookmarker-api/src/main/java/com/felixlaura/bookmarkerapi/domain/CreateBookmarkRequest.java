@@ -13,6 +13,6 @@ public class CreateBookmarkRequest {
     @NotEmpty(message = "Title should not be empty")
     private String title;
 
-    @NotEmpty(message = "URL should not be empty")
+    @NotEmpty(message = "Url should not be empty")
     private String url;
 }
