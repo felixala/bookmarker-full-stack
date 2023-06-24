@@ -109,3 +109,43 @@ Add dependency
     <version>${problem-spring-web.version}</version>
 </dependency>
 ```
+
+### Local Dev Environment Setup using Docker Compose
+See docker compose file.
+Docker compose will use Dockerfile.layered to build.
+```
+$ docker-compose run up
+or
+$ docker-compose run up -d
+
+$ docker-compose logs -f
+```
+
+If the docker-compose file has a different name we can use:
+```
+$ docker-compose -f docker-compose-app.yml up -d
+```
+
+Stop container
+```
+$ docker-compose stop
+```
+
+Delete all containers
+```
+$ docker-compose rm
+```
+
+To force the recreation of the containers
+```
+$ docker-compose up -d --build
+```
+
+Run multiple docker-compose files
+```
+$ docker-compose -f docker-compose-app.yml -f docker-compose.yml up -d
+$ docker-compose -f docker-compose-app.yml -f docker-compose.yml logs -f
+```
+
+### Shell script
+Every time we will need to run above command to run our application, in order to simplify the process, we can automatize uing shell script
