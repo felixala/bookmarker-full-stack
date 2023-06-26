@@ -149,3 +149,14 @@ $ docker-compose -f docker-compose-app.yml -f docker-compose.yml logs -f
 
 ### Shell script
 Every time we will need to run above command to run our application, in order to simplify the process, we can automatize uing shell script
+Run run.sh file
+```
+chmod +x run.sh
+./run.sh
+```
+*** if "chmod +x run.sh" does not work, use "chmod 777 run.sh"
+
+To stop and remove containers
+```
+./run.sh stop
+```
