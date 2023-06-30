@@ -4,12 +4,13 @@ import Bookmark from "@/components/bookmark";
 import Pagination from "@/components/pagination";
 
 interface BookmarksProps{
-bookmarks: BookmarksResponse
+bookmarks: BookmarksResponse,
+    query?:string
 }
 
-const Bookmarks: React.FC<BookmarksProps> = ({bookmarks}) => (
+const Bookmarks: React.FC<BookmarksProps> = ({bookmarks, query}) => (
     <div>
-        <Pagination bookmarks = {bookmarks}/>
+        <Pagination bookmarks = {bookmarks} query={query}/>
         {bookmarks.data.map(bookmark => <Bookmark key={bookmark.id} bookmark={bookmark}/> )}
     </div>
 );
