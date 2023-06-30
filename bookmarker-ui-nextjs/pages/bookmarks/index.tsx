@@ -18,15 +18,16 @@ const Home: NextPage<HomeProps> = (props) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) =>{
-    const {page = 1, query=""} = context.query
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const {page = 1, query = "" } = context.query
     const bookmarks = await fetchBookmarks(parseInt(String(page)), String(query))
-    return{
+    return {
         props: {
             bookmarks,
             query
         }
     }
 }
+
 
 export default Home

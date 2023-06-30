@@ -1,7 +1,5 @@
 import NavBar from "@/components/NavBar";
 import {NextPage} from "next";
-
-
 import React, {useState} from 'react';
 import {saveBookmarks} from "@/services/api";
 
