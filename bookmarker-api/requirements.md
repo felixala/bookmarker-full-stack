@@ -160,3 +160,29 @@ To stop and remove containers
 ```
 ./run.sh stop
 ```
+
+### Adding kind to the project
+Install kind
+Install K8S Lens (Kubernetes GUI Tool)
+
+Create a cluster-create.sh file under kind folder and  run command to create cluster
+```
+./create-cluster.sh
+
+```
+If we get a problem with port 80 refuse to connect, please stop all docker services and then run command above and restart docker
+To stop Docker services command:
+```
+docker stop $(docker ps -a -q)
+```
+
+
+Now, run command to create a pod
+```
+kubectl run boomarker-api --image=felixalaura/bookmarker-api --port=8080
+```
+
+To see all the logs for the specific pod
+```
+kubectl logs bookmarker-api -f
+```

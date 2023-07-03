@@ -1,5 +1,6 @@
 import {GetServerSideProps, NextPage} from "next";
 import {BookmarksResponse} from "@/services/models";
+
 import {fetchBookmarks} from "@/services/api";
 import Bookmarks from "@/components/Bookmarks";
 import SearchForm from "@/components/SearchForm";
@@ -13,7 +14,7 @@ const Home: NextPage<HomeProps> = (props) => {
   return (
   <div>
       <SearchForm/>
-      <Bookmarks bookmarks={ props.bookmarks} query={props.query}/>
+      <Bookmarks bookmarks={props.bookmarks} query={props.query}/>
   </div>
   )
 }
@@ -28,6 +29,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
     }
 }
-
 
 export default Home
