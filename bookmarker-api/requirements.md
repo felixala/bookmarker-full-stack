@@ -186,3 +186,182 @@ To see all the logs for the specific pod
 ```
 kubectl logs bookmarker-api -f
 ```
+
+Create a pod
+```
+kubectl run bookmarker-api --image=felixalaura/bookmarker-api --port=8080
+```
+
+Start interactive shell and access to API endppoints
+```
+$ kubectl exec -it bookmarker-api -- /bin/sh
+```
+then enter to get all the bookmarks
+```
+# curl http://localhost:8080/api/bookmarks
+```
+type exit (to exit the program)
+
+To get all services, pods, deployments, etc
+```
+kubectl get all
+```
+
+Create pod from imperative mode
+```
+kubectl run bookmarker-api --imagae=felixlaura/bookmarker-api --port=8080 --dry-run=client -o yaml > pod.yaml
+
+edit file and then type
+
+kubectl apply -f pod.yaml
+```
+
+Creating deployment (make sure any pod is running)
+```
+kubectl create deployment bookmarker-api-youtube --image=sivaprasadreddy/bookmarker-api
+kubectl get all
+kubectl delete deployment/bookmarker-api-youtbe
+```
+
+Creating yaml file for deployment
+```
+kubectl create deployment bookmarker-api --image=felixalaura/bookmarker-api --dry-run=client -o yaml > deployment.yaml
+kubectl apply -f deployment.yaml
+kubectl get all
+```
+
+delete all resoures related to deployment 
+```
+kubectl delete -f deployment.yaml
+```
+
+scaling replicas
+```
+kubectl scale deployment bookmarker-api --replicas=3
+```
+
+See history particular deployment
+```
+kubectl rollout history deployments bookmarker-api
+```
+
+Under k8s we created two yaml files. One for deployment database and another for api
+To apply all the files in the current directory
+```
+kubectl apply -f .
+```
+
+Create ConfigMap for database resource
+```
+kubectl create cm db-config --from-literal=db_host=postgres --from-literal=db_name=appdb --dry-run=client -o yaml > 1-config.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookmarker-config
+data:
+  postgres_host: postgres
+  postgres_dbname: appdb
+  postgres_port: "5432"
+  postgres_username: postgres
+  postgres_password: postgres
+  
+kubectl apply -f 1-config.yaml
+```
+
+Use Spring Profile on KUBERNETES with user k8s. Add the following code in application.properties
+```
+#---
+spring.config.activate.on-profile=k8s
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:appdb}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:postgres}
+```
+
+To use Spring Profile in bookmarker-api.yaml 
+```
+spec:
+      containers:
+        - name: bookmarker
+          image: sivaprasadreddy/bookmarker-api
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  key: postgres_host
+                  name: bookmarker-config
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: postgres_port
+                  name: bookmarker-config
+            - name: DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  key: postgres_dbname
+                  name: bookmarker-config
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: postgres_username
+                  name: bookmarker-secrets
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgres_password
+                  name: bookmarker-secrets
+```
+
+Create Secrets in Kubernetes
+```
+Kubectl create secret generic bookmarker-secrets --from-literal=postgres_sername=postgres --dry-run=client -o yaml
+```
+
+Persistent Volume and PV Claims
+```
+    spec:
+      containers:
+        - name: postgres
+          image: "postgres:14-alpine"
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bookmarker-secrets
+                  key: postgres_username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bookmarker-secrets
+                  key: postgres_password
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: bookmarker-config
+                  key: postgres_dbname
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: bookmarker-config
+                  key: postgres_dbname
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+```
+
+Exposing pods and using Services

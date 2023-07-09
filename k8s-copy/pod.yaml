@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bookmarker-api
+  labels:
+    app: bookmarker-api
+    version: "1.0"
+spec:
+  containers:
+  - image: felixalaura/bookmarker-api
+    name: bookmarker-api
+    ports:
+    - containerPort: 8080
+
+
